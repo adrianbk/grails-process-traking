@@ -23,7 +23,8 @@ class ProcessServiceTest extends GroovyTestCase {
     void clean(){
         Process.executeUpdate("delete from ProcessEvent ")
         Process.executeUpdate("delete from Process")
-        pid = processService.createProcess("My Process", null)
+        Process.executeUpdate("delete from ProcessGroup")
+        pid = processService.createProcess(new CreateProcessRequest())//createProcess("My Process", null)
     }
 
 
@@ -33,6 +34,15 @@ class ProcessServiceTest extends GroovyTestCase {
         assert process.complete == null
         assert process.status == QUEUED
         assert process.progress == 0F
+    }
+
+    @Test
+    void shouldCorrectlyCreateANewProcessGroup()
+    {
+        Process process = Process.findById(pid)
+        assert process.processGroup.total == 1L
+        assert process.processGroup.name == new CreateProcessRequest().groupName
+        assert process.processGroup.averageDuration == 0L
     }
 
     @Test
@@ -89,7 +99,7 @@ class ProcessServiceTest extends GroovyTestCase {
     }
 
     @Test
-    void shouldCompletionEventWhenCompletedSuccessfully(){
+    void shouldHaveCompletionEventWhenCompletedSuccessfully(){
         Date now = new Date()
         processService.completeProcess(pid)
         Process process = Process.findById(pid)
@@ -105,6 +115,30 @@ class ProcessServiceTest extends GroovyTestCase {
         Process process = Process.findById(pid)
         assert process.status == FAILED
     }
+
+    @Test
+    void shouldIncrementGroupAverageWhenCompleted(){
+        Long sleepDuration = 400
+        Long threshold = 100
+        Process p1 = Process.findById(processService.createProcess(new CreateProcessRequest()))
+        ProcessGroup processGroup = p1.processGroup
+
+        Thread.currentThread().sleep(sleepDuration)
+        processService.completeProcess(p1.id)
+
+        CreateProcessRequest createProcessRequest = new CreateProcessRequest()
+            .withProcessGroup(processGroup)
+
+        Process p2 = Process.findById(processService.createProcess(createProcessRequest))
+        Thread.currentThread().sleep(sleepDuration)
+        processService.completeProcess(p2.id)
+
+        assert p2.processGroup.total == 2
+        assert (p2.processGroup.averageDuration - sleepDuration).abs() < threshold
+    }
+
+
+
 
     @Test
     void shouldIncrementProgress(){

@@ -8,32 +8,41 @@ grails.project.dependency.resolution = {
         // uncomment to disable ehcache
         // excludes 'ehcache'
     }
-    log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
+    log "error" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     repositories {
         grailsCentral()
         grailsPlugins()
         grailsHome()
-        grailsCentral()
-        mavenLocal()
+//        mavenLocal()
         mavenCentral()
 
         // uncomment these (or add new ones) to enable remote dependency resolution from public Maven repositories
-        mavenRepo "http://snapshots.repository.codehaus.org"
-        mavenRepo "http://repository.codehaus.org"
-        mavenRepo "http://download.java.net/maven/2/"
-        mavenRepo "http://repository.jboss.com/maven2/"
-        mavenRepo "http://repo.jenkins-ci.org/public/"
-        mavenRepo "http://download.eclipse.org/jgit/maven/"
+//        mavenRepo "http://snapshots.repository.codehaus.org"
+//        mavenRepo "http://repository.codehaus.org"
+//        mavenRepo "http://download.java.net/maven/2/"
+//        mavenRepo "http://repository.jboss.com/maven2/"
+//        mavenRepo "http://repo.jenkins-ci.org/public/"
+//        mavenRepo "http://download.eclipse.org/jgit/maven/"
     }
     dependencies {
         runtime 'mysql:mysql-connector-java:5.1.20'
     }
 
     plugins {
-        build(":tomcat:$grailsVersion",
-              ":release:2.0.3",
-              ":rest-client-builder:1.0.2") {
+        build(":tomcat:$grailsVersion")
+        build(":release:2.0.3")
+        {
             export = false
+            excludes 'groovy'
+            excludes 'httpclient'
+            excludes 'xml-apis'
+        }
+        build(":rest-client-builder:1.0.2")
+        {
+            export = false
+            excludes 'groovy'
+            excludes 'httpclient'
+            excludes 'xml-apis'
         }
         test ":spock:0.7"
         runtime ":hibernate:$grailsVersion"

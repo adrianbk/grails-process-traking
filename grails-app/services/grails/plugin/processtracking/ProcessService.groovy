@@ -31,6 +31,37 @@ class ProcessService {
     PersistenceContextInterceptor persistenceInterceptor
     def messageSource
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+        def Long createProcess(CreateProcessRequest createProcessRequest) {
+        Process process = new Process()
+
+        ProcessGroup processGroup = createProcessRequest.processGroup
+        if(null == processGroup){
+            processGroup = new ProcessGroup(name: createProcessRequest.groupName)
+        }
+        processGroup.total += 1
+        process.processGroup = processGroup
+        saveDomainWithPersistenceContext(processGroup)
+
+        process.initiated = new Date()
+        process.relatedDomainId = createProcessRequest.relatedDomainId;
+        process.progress = 0F;
+        process.name = createProcessRequest.processName
+        process.status = QUEUED
+        process.userId = createProcessRequest.userId
+        saveDomainWithPersistenceContext(process)
+
+        //One less db query than addTo.. hibernate updates the parents version after that addTo..
+        ProcessEvent event = new ProcessEvent(
+                message: createProcessRequest.queuedMessage,
+                eventLevel: INFO,
+                timestamp: new Date(),
+                process: process
+        )
+        saveDomainWithPersistenceContext(event)
+        return process.id
+    }
+
     /**
      * Create a new Process supplying the name of the process
      * Process is set to the QUEUED state, progress to 0 and its unique identifier returned.
@@ -59,8 +90,7 @@ class ProcessService {
         process.name = argName
         process.status = QUEUED
         process.userId = argUserName
-        persistenceInterceptor.init()
-        process.save(failOnError: true)
+        saveDomainWithPersistenceContext(process)
 
         //One less db query than addTo.. hibernate updates the parents version after that addTo..
         ProcessEvent event = new ProcessEvent(
@@ -68,9 +98,8 @@ class ProcessService {
                 eventLevel: INFO,
                 timestamp: new Date(),
                 process: process
-        ).save(failOnError: true)
-        persistenceInterceptor.flush()
-        persistenceInterceptor.destroy()
+        )
+        saveDomainWithPersistenceContext(event)
         return process.id
     }
 
@@ -127,9 +156,19 @@ class ProcessService {
 
 
         int numErrorEvents = ProcessEvent.countByProcessAndEventLevel(process, ERROR)
-        log.error("error Count: ${numErrorEvents}")
-//        int numErrorEvents = ProcessEvent.executeQuery("select count(*) from ProcessEvent pe where pe.process.id = :pid and pe.eventLevel = :errorStatus", [pid: argProcessId, errorStatus: ERROR])[0]
         process.status = numErrorEvents ? FAILED : SUCCESS
+
+        if(process.status == SUCCESS){
+            ProcessGroup processGroup = process.processGroup
+            if(null != processGroup){
+                if(processGroup.averageDuration == 0L){
+                    process.processGroup.averageDuration = td.millis
+                } else{
+                    Long sum = processGroup.averageDuration + td.millis
+                    process.processGroup.averageDuration = sum/2
+                }
+            }
+        }
         saveDomainWithPersistenceContext(process)
     }
 
@@ -198,13 +237,19 @@ class ProcessService {
     }
 
     def saveDomainWithPersistenceContext(domain) {
+        //Wrap with persistenceInterceptor since this service may be called asynchronously (threads without a bound persistence session)
         persistenceInterceptor.init()
-        if (!domain.save()) {
-            domain.errors?.allErrors?.each {
-                log.error(it)
+        try{
+            if (!domain.save()) {
+                domain.errors?.allErrors?.each {
+                    log.error(it)
+                }
             }
         }
-        persistenceInterceptor.flush()
-        persistenceInterceptor.destroy()
+        finally{
+            persistenceInterceptor.flush()
+            persistenceInterceptor.destroy()
+        }
+
     }
 }

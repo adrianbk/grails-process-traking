@@ -8,6 +8,8 @@ class Process {
     //Use hibernate bags for performance - order managed elsewhere
     Collection processEvents
     static hasMany = [processEvents: ProcessEvent]
+    ProcessGroup processGroup
+
     //Persisted members
     String name
     Long relatedDomainId //An optional domain id to relate a process to another domain object
@@ -16,7 +18,6 @@ class Process {
     Float progress //Progress percentage
     ProcessStatus status
     String userId
-    String processGroup
     Date dateCreated
     Date lastUpdated
 
