@@ -16,6 +16,9 @@ class ProcessServiceTest extends GroovyTestCase {
 
     static transactional = false
     public static final int THREAD_POOL_SIZE = 80
+    public static final Long SLEEP_DURATION = 100
+    //Using sleeps to simulate timing  of processes - may need to tweak TIMING_INACCURACY_THRESHOLD - threads never guaranteed
+    public static final Long TIMING_INACCURACY_THRESHOLD = 40
     ProcessService processService
     Long pid
 
@@ -24,9 +27,8 @@ class ProcessServiceTest extends GroovyTestCase {
         Process.executeUpdate("delete from ProcessEvent ")
         Process.executeUpdate("delete from Process")
         Process.executeUpdate("delete from ProcessGroup")
-        pid = processService.createProcess(new CreateProcessRequest())//createProcess("My Process", null)
+        pid = processService.createProcess(new CreateProcessRequest())
     }
-
 
     @Test
     void shouldCreateAProcess(){
@@ -37,12 +39,34 @@ class ProcessServiceTest extends GroovyTestCase {
     }
 
     @Test
-    void shouldCorrectlyCreateANewProcessGroup()
+    void shouldHaveNoGroupWhenProcessCreatedWithout(){
+        CreateProcessRequest cpr = new CreateProcessRequest()
+        pid = processService.createProcess(cpr)
+        Process process = Process.findById(pid)
+        assert process.processGroup == null
+    }
+
+    @Test
+    void shouldCorrectlyCreateANewProcessGroupWhenGroupNameIsSpecified()
     {
+        CreateProcessRequest cpr = new CreateProcessRequest().withGroupName("Test Group")
+        pid = processService.createProcess(cpr)
         Process process = Process.findById(pid)
         assert process.processGroup.total == 1L
-        assert process.processGroup.name == new CreateProcessRequest().groupName
+        assert process.processGroup.name == cpr.groupName
         assert process.processGroup.averageDuration == 0L
+    }
+
+    @Test
+    void firstProcessGroupShouldHaveAverageOfDurationOfFirstProcess()
+    {
+        CreateProcessRequest cpr = new CreateProcessRequest().withGroupName("Test Group")
+        pid = processService.createProcess(cpr)
+        Thread.currentThread().sleep(SLEEP_DURATION)
+        processService.completeProcess(pid)
+        Process process = Process.findById(pid)
+
+        assertEquals(true, isAverageDurationWithinThreshold(process.processGroup, TIMING_INACCURACY_THRESHOLD, SLEEP_DURATION))
     }
 
     @Test
@@ -118,27 +142,24 @@ class ProcessServiceTest extends GroovyTestCase {
 
     @Test
     void shouldIncrementGroupAverageWhenCompleted(){
-        Long sleepDuration = 400
-        Long threshold = 100
-        Process p1 = Process.findById(processService.createProcess(new CreateProcessRequest()))
+
+        Process p1 = Process.findById(processService.createProcess(new CreateProcessRequest().withGroupName("Test 1")))
         ProcessGroup processGroup = p1.processGroup
 
-        Thread.currentThread().sleep(sleepDuration)
+        Thread.currentThread().sleep(SLEEP_DURATION)
         processService.completeProcess(p1.id)
 
         CreateProcessRequest createProcessRequest = new CreateProcessRequest()
             .withProcessGroup(processGroup)
 
         Process p2 = Process.findById(processService.createProcess(createProcessRequest))
-        Thread.currentThread().sleep(sleepDuration)
+        Thread.currentThread().sleep(SLEEP_DURATION)
         processService.completeProcess(p2.id)
+        p2 = Process.findById(p2.id)
 
         assert p2.processGroup.total == 2
-        assert (p2.processGroup.averageDuration - sleepDuration).abs() < threshold
+        assertEquals(true, isAverageDurationWithinThreshold(p2.processGroup, TIMING_INACCURACY_THRESHOLD, SLEEP_DURATION))
     }
-
-
-
 
     @Test
     void shouldIncrementProgress(){
@@ -166,4 +187,7 @@ class ProcessServiceTest extends GroovyTestCase {
         assert process.complete.compareTo(now) >= 0
     }
 
+    private isAverageDurationWithinThreshold (ProcessGroup processGroup, Long threshold, Long duration ){
+        (processGroup.averageDuration - duration).abs() < threshold
+    }
 }

@@ -22,6 +22,7 @@ class Process {
     Date lastUpdated
 
 
+
     static constraints = {
         name(blank: false, nullable: false)
         relatedDomainId(blank: true, nullable: true, required:false)

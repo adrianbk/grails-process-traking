@@ -12,6 +12,11 @@ class ProcessController {
         render(view: 'list', model: [processList: Process.list(params) , processTotal: Process.count()])
     }
 
+    def tile(){
+        log.error("called")
+        render(view: '/processtracking/tile')
+    }
+
     def jsonList() {
         def processIds = params.list('processIds')
         def idsAsLongs = processIds*.asType(Long)

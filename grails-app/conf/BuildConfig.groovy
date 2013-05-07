@@ -26,6 +26,7 @@ grails.project.dependency.resolution = {
     }
     dependencies {
         runtime 'mysql:mysql-connector-java:5.1.20'
+        test ("org.jsoup:jsoup:1.7.2")
     }
 
     plugins {
@@ -33,7 +34,7 @@ grails.project.dependency.resolution = {
         build(":release:2.0.3")
         {
             export = false
-            excludes 'groovy'
+            excludes 'groovy' //Prevent trying to downloading all groovy versions
             excludes 'httpclient'
             excludes 'xml-apis'
         }
@@ -44,7 +45,17 @@ grails.project.dependency.resolution = {
             excludes 'httpclient'
             excludes 'xml-apis'
         }
+        compile (":lesscss-resources:1.3.3")
         test ":spock:0.7"
-        runtime ":hibernate:$grailsVersion"
+
+        runtime (":hibernate:$grailsVersion") {
+            export = false
+        }
+        runtime (":resources:1.2.RC2") {
+            export = false
+        }
+        compile (":jquery:1.8.3"){
+            export = false
+        }
     }
 }

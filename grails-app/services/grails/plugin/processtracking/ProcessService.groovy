@@ -25,23 +25,25 @@ import grails.validation.ValidationException
  * In short, every insert or update is completed in its own persistence context and transaction.
  *
  */
-@Transactional(propagation = Propagation.REQUIRES_NEW)
+//@Transactional(propagation = Propagation.REQUIRES_NEW)
 class ProcessService {
     static transactional = false
     PersistenceContextInterceptor persistenceInterceptor
     def messageSource
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    //@Transactional(propagation = Propagation.REQUIRES_NEW)
         def Long createProcess(CreateProcessRequest createProcessRequest) {
         Process process = new Process()
 
-        ProcessGroup processGroup = createProcessRequest.processGroup
-        if(null == processGroup){
-            processGroup = new ProcessGroup(name: createProcessRequest.groupName)
+        if(null != createProcessRequest.processGroup || null != createProcessRequest.groupName){
+            ProcessGroup processGroup = createProcessRequest.processGroup
+            if(null != createProcessRequest.groupName){
+                processGroup = new ProcessGroup(name: createProcessRequest.groupName)
+            }
+            processGroup.total += 1
+            process.processGroup = processGroup
+            saveDomainWithPersistenceContext(processGroup)
         }
-        processGroup.total += 1
-        process.processGroup = processGroup
-        saveDomainWithPersistenceContext(processGroup)
 
         process.initiated = new Date()
         process.relatedDomainId = createProcessRequest.relatedDomainId;
@@ -69,7 +71,7 @@ class ProcessService {
      * @param argUserName - the user executing/calling the process
      * @return a long - the unique identifier of the process details object
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    //@Transactional(propagation = Propagation.REQUIRES_NEW)
     def Long createProcess(String argName, String argUserName) {
         return createProcess(argName, null, argUserName)
     }
@@ -81,7 +83,7 @@ class ProcessService {
      * @param argUserName - the user executing/calling the process
      * @return a long - the unique identifier of the process details object
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    //@Transactional(propagation = Propagation.REQUIRES_NEW)
     def Long createProcess(String argName, argRelatedDomainId, String argUserName) {
         Process process = new Process()
         process.initiated = new Date()
@@ -109,7 +111,7 @@ class ProcessService {
      * @param argMessage - The message/text
      * @param argEventLevel - The EventLevel
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    //@Transactional(propagation = Propagation.REQUIRES_NEW)
     def void addProcessEvent(Long argProcessId, String argMessage, ProcessEvent.EventLevel argEventLevel) {
         Process process = Process.findById(argProcessId)
         ProcessEvent processEvent = new ProcessEvent(
@@ -126,7 +128,7 @@ class ProcessService {
      * @param argProcessId
      * @return a long - the unique identifier of the process details object
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    //@Transactional(propagation = Propagation.REQUIRES_NEW)
     def initiateProcess(Long argProcessId) {
         Process process = Process.findById(argProcessId)
         process.initiated = new Date()
@@ -145,7 +147,7 @@ class ProcessService {
      * @param argProcessId - the process id(unique identifier)
      * @param argProcessStatus - the completion status.
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    //@Transactional(propagation = Propagation.REQUIRES_NEW)
     def void completeProcess(Long argProcessId) {
         Process process = Process.findById(argProcessId)
         process.progress = 100F
@@ -159,26 +161,29 @@ class ProcessService {
         process.status = numErrorEvents ? FAILED : SUCCESS
 
         if(process.status == SUCCESS){
-            ProcessGroup processGroup = process.processGroup
-            if(null != processGroup){
-                if(processGroup.averageDuration == 0L){
-                    process.processGroup.averageDuration = td.millis
-                } else{
-                    Long sum = processGroup.averageDuration + td.millis
-                    process.processGroup.averageDuration = sum/2
-                }
-            }
+            calculateAverageDuration(process, td)
         }
         saveDomainWithPersistenceContext(process)
     }
 
+    private void calculateAverageDuration(Process process, TimeDuration td) {
+        ProcessGroup processGroup = process.processGroup
+        if (null != processGroup) {
+            if (processGroup.averageDuration == 0L) {
+                process.processGroup.averageDuration = td.millis
+            } else {
+                Long sum = processGroup.averageDuration + td.millis
+                process.processGroup.averageDuration = sum / 2
+            }
+        }
+    }
 
     /**
      * Increments the process status
      * @param argProcessId - id of the Process
      * @param argProgressPercent - amount to increment by.
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    //@Transactional(propagation = Propagation.REQUIRES_NEW)
     def void incrementProcessProgress(Long argProcessId, Long argProgressPercent) {
         Process process = Process.findById(argProcessId)
         process.progress = process.progress += argProgressPercent
@@ -191,7 +196,7 @@ class ProcessService {
      * @param argProcessId - the process id
      * @param argMessage - message
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    //@Transactional(propagation = Propagation.REQUIRES_NEW)
     def void failProcess(Long argProcessId, String argMessage) {
         Process process = Process.findById(argProcessId)
         process.setComplete(new Date())
@@ -210,7 +215,7 @@ class ProcessService {
      * @param argProcessId - the process id
      * @param throwable - Throwable
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    //@Transactional(propagation = Propagation.REQUIRES_NEW)
     def void failProcess(Long argProcessId, Throwable throwable) {
         Process process = Process.findById(argProcessId)
         process.setComplete(new Date())
@@ -231,25 +236,25 @@ class ProcessService {
     }
 
 
-    def TimeDuration getTimeDuration(Process process) {
-        TimeDuration td = TimeCategory.minus(process.complete, process.initiated)
-        td
-    }
-
     def saveDomainWithPersistenceContext(domain) {
         //Wrap with persistenceInterceptor since this service may be called asynchronously (threads without a bound persistence session)
         persistenceInterceptor.init()
-        try{
-            if (!domain.save()) {
-                domain.errors?.allErrors?.each {
-                    log.error(it)
-                }
+        if (!domain.save()) {
+            domain.errors?.allErrors?.each {
+                log.error(it)
             }
         }
-        finally{
+        else {
+            //Only flush and destroy if success otherwise ERROR hibernate.AssertionFailure  - an assertion failure
+            // occured (this may indicate a bug in Hibernate, but is more likely due to unsafe use of the session)
             persistenceInterceptor.flush()
             persistenceInterceptor.destroy()
         }
 
+    }
+
+    def TimeDuration getTimeDuration(Process process) {
+        TimeDuration td = TimeCategory.minus(process.complete, process.initiated)
+        td
     }
 }

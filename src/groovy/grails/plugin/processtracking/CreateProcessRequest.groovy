@@ -5,7 +5,7 @@ class CreateProcessRequest {
     String processName = "Default Process"
     String userId = null
     Long relatedDomainId = null
-    String groupName = "Default Group Name"
+    String groupName = null
     String queuedMessage = "Process queued"
     ProcessGroup processGroup = null
 
@@ -47,7 +47,7 @@ class CreateProcessRequest {
      * @return
      */
     def withGroupName(groupName){
-        this.groupName
+        this.groupName = groupName
         this
     }
 

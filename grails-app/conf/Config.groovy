@@ -1,3 +1,7 @@
+import org.codehaus.groovy.grails.commons.DefaultGrailsDomainClass
+import grails.plugin.processtracking.Process
+import spock.lang.Shared
+
 // configuration for plugin testing - will not be included in the plugin zip
 //grails.json.legacy.builder = false
 //grails.converters.encoding = "ISO-8859-1"
@@ -5,6 +9,19 @@
 //grails.converters.json.pretty.print = true
 //grails.converters.json.date = "javascript"
 //grails.converters.json.domain.include.version = false
+
+
+processTracking{
+    tableDisplayProperties = [
+            name: 'Name',
+            initiated: 'Iinitiated',
+            status: 'Status',
+            userId: 'User',
+            progress: 'Progress',
+            complete: 'Complete',
+            processGroup: 'ProcessGroup'
+        ]
+}
 
 log4j = {
     // Example of changing the log pattern for the default console
@@ -15,7 +32,7 @@ log4j = {
 
     }
 
-    error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
+    warn   'org.codehaus.groovy.grails.web.servlet',  //  controllers
            'org.codehaus.groovy.grails.web.pages', //  GSP
            'org.codehaus.groovy.grails.web.sitemesh', //  layouts
            'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
@@ -31,3 +48,4 @@ log4j = {
     //Logs the actual params passed in the sql statements
 //    trace 'org.hibernate.type'
 }
+

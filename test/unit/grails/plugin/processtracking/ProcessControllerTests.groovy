@@ -7,6 +7,8 @@ import grails.plugin.processtracking.ProcessEvent;
 import static grails.plugin.processtracking.Process.ProcessStatus.*
 import static grails.plugin.processtracking.ProcessEvent.EventLevel.*
 import grails.converters.deep.JSON
+import org.junit.Ignore
+
 
 @TestFor(ProcessController)
 @Mock([Process, ProcessEvent])
