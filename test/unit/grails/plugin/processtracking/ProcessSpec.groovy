@@ -32,8 +32,6 @@ class ProcessSpec extends UnitSpec {
             "test" | null            | 101      | null     | FAILED | null   | new Date() | false
             "test" | null            | 100      | null     | FAILED | null   | null       | false
     }
-
-
 }
 
 

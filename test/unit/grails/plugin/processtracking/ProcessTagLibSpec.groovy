@@ -1,15 +1,13 @@
 package grails.plugin.processtracking
 
 import grails.test.mixin.TestFor
-import spock.lang.Specification
-import processtracking.ProcessTagLib
-import org.codehaus.groovy.grails.commons.DefaultGrailsDomainClass
-import spock.lang.Unroll
-import spock.lang.Shared
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
-import javax.lang.model.util.Elements
+import processtracking.ProcessTagLib
+import spock.lang.Shared
+import spock.lang.Specification
+import spock.lang.Unroll
 
 @TestFor(ProcessTagLib)
 class ProcessTagLibSpec extends Specification {
@@ -25,24 +23,19 @@ class ProcessTagLibSpec extends Specification {
     ]
 
     def setup() {
-
         grailsApplication.config.processTracking.tableDisplayProperties = defaultDisplayProperties
-
-
-    //[complete, dateCreated, initiated, lastUpdated, name, processEvents, processGroup, progress, relatedDomainId, status, userId]
-    //[Complete, Date Created, Initiated, Last Updated, Name, Process Events, Process Group, Progress, Related Domain Id, Status, User Id]
-    }
-
-    def cleanup() {
     }
 
     @Unroll("displayProperties: #displayProperties | expectedProperties: #expectedProperties")
     def "create a process table"(displayProperties, expectedProperties) {
         given: "A List of processes"
             def processInstanceList =  (1 ..10).collect{
-                new Process(complete: false,
+                new Process(complete: new Date(),
                     name: "process name $it",
-                    id:  it
+                    id:  it,
+                    status: Process.ProcessStatus.QUEUED,
+                    userId: 'username',
+                    progress: 0L
                 )
             }
 
@@ -75,8 +68,8 @@ class ProcessTagLibSpec extends Specification {
     def "process table rows are classed with odd and even"(){
         given: "A List of processes"
         def processInstanceList =  (1 ..3).collect{
-            new Process(complete: false,
-                    name: 'process name $it',
+            new Process(complete: new Date(),
+                    name: "process name $it",
                     id:  it
             )
         }
@@ -89,6 +82,41 @@ class ProcessTagLibSpec extends Specification {
         then:
             rows.get(1).className() == 'even'
             rows.get(2).className() == 'odd'
+
+    }
+
+    def "Process rows match the process list"(){
+        given: "A List of processes"
+        def processInstanceList =  (1 ..3).collect{
+            new Process(complete: new Date(),
+                    name: "process name $it",
+                    id:  it,
+                    status: Process.ProcessStatus.QUEUED,
+                    userId: 'username',
+                    progress: 0L
+            )
+        }
+        when: "I render a process table"
+            def html = tagLib.processTable(processList: processInstanceList)
+            def dom = jsoup(html)
+            Element table = dom.getElementsByTag('table').first()
+            def rows = table.select('tr')
+
+        then: "The expected process valuse should appear in the table rows"
+           processInstanceList.eachWithIndex {Process process, i ->
+               Element row = rows.get(i+1)
+               defaultDisplayProperties.eachWithIndex {entry, j->
+                   //Need asserts inside closures
+                   Element cell = row.child(j)
+                   String expected = ""
+                   //?: does not work for floats equal 0 - groovy truth...
+                   if(null != process."${entry.key}"){
+                       expected = process."${entry.key}"
+                   }
+                   println "Expected: ${expected} for ${entry.key}"
+                   assert cell.text() == expected
+               }
+           }
 
     }
 
