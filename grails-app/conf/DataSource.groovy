@@ -4,14 +4,25 @@
  GRANT USAGE ON ptracking.* to ptracking@localhost IDENTIFIED BY 'ptracking';
  GRANT ALL ON ptracking.* to ptracking@localhost;
  */
-dataSource {
-    pooled = true
-    driverClassName = "com.mysql.jdbc.Driver"
-    dialect = "org.hibernate.dialect.MySQL5InnoDBDialect"
+
+hibernate {
+    cache.use_second_level_cache = true
+    cache.use_query_cache = true
+    cache.provider_class = 'net.sf.ehcache.hibernate.EhCacheProvider'
+}
+
+//dataSource_processTracking{
+//    pooled = true
+//    driverClassName = "org.h2.Driver"
+//    username = "sa"
+//    password = ""
+//}
+//My SQL
+dataSource_processTracking {
     pooled=true
     dbCreate='update'
     driverClassName='com.mysql.jdbc.Driver'
-    dialect='org.hibernate.dialect.MySQL5InnoDBDialect'
+    dialect='org.hibernate.dialect.MySQL5Dialect'
     username='ptracking'
     password='ptracking'
     properties {
@@ -25,21 +36,17 @@ dataSource {
         validationQuery='SELECT 1'
     }
 }
-hibernate {
-    cache.use_second_level_cache = true
-    cache.use_query_cache = true
-    cache.provider_class = 'net.sf.ehcache.hibernate.EhCacheProvider'
-}
 environments {
 
+       //My SQL
     development {
-        dataSource{
+        dataSource_processTracking{
             dbCreate = "update" // one of 'create', 'create-drop','update'
             url = "jdbc:mysql://localhost:3306/ptracking?useUnicode=yes&characterEncoding=UTF-8"
         }
     }
     test {
-        dataSource {
+        dataSource_processTracking {
 //            loggingSql = false
 //            formatSql = false
             dbCreate = "update" // one of 'create', 'create-drop','update'
@@ -47,4 +54,36 @@ environments {
         }
 
     }
+
+    //In Memory DB
+//    development {
+//        dataSource_processTracking {
+//            dbCreate = "create-drop" // one of 'create', 'create-drop', 'update', 'validate', ''
+//            url = "jdbc:h2:mem:devDb;MVCC=TRUE;LOCK_TIMEOUT=10000"
+//        }
+//    }
+//    test {
+//        dataSource_processTracking {
+//            dbCreate = "update"
+//            url = "jdbc:h2:mem:testDb;MVCC=TRUE;LOCK_TIMEOUT=10000"
+//        }
+//    }
+    production {
+        dataSource_processTracking {
+            dbCreate = "update"
+            url = "jdbc:h2:prodDb;MVCC=TRUE;LOCK_TIMEOUT=10000"
+            pooled = true
+            properties {
+                maxActive = -1
+                minEvictableIdleTimeMillis=1800000
+                timeBetweenEvictionRunsMillis=1800000
+                numTestsPerEvictionRun=3
+                testOnBorrow=true
+                testWhileIdle=true
+                testOnReturn=true
+                validationQuery="SELECT 1"
+            }
+        }
+    }
 }
+

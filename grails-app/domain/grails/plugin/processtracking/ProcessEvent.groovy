@@ -1,5 +1,9 @@
 package grails.plugin.processtracking
 
+import org.jadira.usertype.dateandtime.joda.PersistentDateTime
+import org.joda.time.DateTime
+import org.joda.time.contrib.hibernate.PersistentDateTime
+
 class ProcessEvent {
 
     public enum EventLevel {
@@ -9,9 +13,9 @@ class ProcessEvent {
     static belongsTo = [process: Process]
     String message;
     EventLevel eventLevel
-    Date dateCreated
-    Date lastUpdated
-    Date timestamp
+    DateTime dateCreated
+    DateTime lastUpdated
+    DateTime timestamp
 
     static constraints = {
         message(maxSize: 3000, nullable: false, blank: false)
@@ -23,8 +27,12 @@ class ProcessEvent {
 
     /** table mappings */
     static mapping = {
+        datasource 'processTracking'
         table "PROCESS_EVENT"
         sort id: "asc"
+        dateCreated type: PersistentDateTime
+        lastUpdated type: PersistentDateTime
+        timestamp type: PersistentDateTime
     }
 
     /* Trim the message in case a stacktrace is the message */

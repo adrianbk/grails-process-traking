@@ -2,6 +2,7 @@ package grails.plugin.processtracking
 
 import grails.plugin.spock.UnitSpec
 import org.apache.commons.lang.RandomStringUtils
+import org.joda.time.DateTime
 
 class ProcessEventSpec extends UnitSpec {
     def "domain constraints"() {
@@ -16,11 +17,11 @@ class ProcessEventSpec extends UnitSpec {
             UnitTestHelper.isValidDomain(event, valid) == valid
 
         where:
-            process       | message                        | eventLevel                    | timestamp  | valid
-            new Process() | "Event message"                | ProcessEvent.EventLevel.DEBUG | new Date() | true
-            new Process() | ""                             | ProcessEvent.EventLevel.DEBUG | new Date() | false
-            new Process() | RandomStringUtils.random(3002) | ProcessEvent.EventLevel.DEBUG | new Date() | true
-            new Process() | "Event message"                | ProcessEvent.EventLevel.DEBUG | null       | false
+            process       | message                        | eventLevel                    | timestamp            | valid
+            new Process() | "Event message"                | ProcessEvent.EventLevel.DEBUG | new DateTime().now() | true
+            new Process() | ""                             | ProcessEvent.EventLevel.DEBUG | new DateTime().now() | false
+            new Process() | RandomStringUtils.random(3002) | ProcessEvent.EventLevel.DEBUG | new DateTime().now() | true
+            new Process() | "Event message"                | ProcessEvent.EventLevel.DEBUG | null                 | false
     }
 
 

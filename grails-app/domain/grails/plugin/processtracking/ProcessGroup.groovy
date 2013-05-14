@@ -12,6 +12,8 @@ class ProcessGroup {
     }
 
     static mapping = {
+        datasource 'processTracking'
+        version false //Turn off Optimistic Locking
         table "PROCESS_GROUP"
     }
 

@@ -27,6 +27,11 @@ grails.project.dependency.resolution = {
     dependencies {
         runtime 'mysql:mysql-connector-java:5.1.20'
         test ("org.jsoup:jsoup:1.7.2")
+        compile("joda-time:joda-time-hibernate:1.3") {
+            excludes "joda-time", "hibernate"
+        }
+//        compile 'org.jadira.usertype:usertype.jodatime:1.9'
+//        compile 'joda-time:joda-time:2.1'
     }
 
     plugins {
@@ -46,6 +51,7 @@ grails.project.dependency.resolution = {
             excludes 'xml-apis'
         }
         compile (":lesscss-resources:1.3.3")
+        compile (":joda-time:1.4")
         test ":spock:0.7"
 
         runtime (":hibernate:$grailsVersion") {
