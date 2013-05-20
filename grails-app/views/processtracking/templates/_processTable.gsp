@@ -4,7 +4,6 @@
             <th>${entry.value}</th>
         </g:each>
     </tr>
-
     <g:each in="${processList}" var="process" status="i">
         <tr data-process-id="${process.id}" class="${i % 2 == 0 ? 'even' : 'odd'}">
             <g:each in="${displayProperties}" var="entry">

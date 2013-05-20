@@ -14,3 +14,6 @@ test-app :integration --echoOut
 
 Running all spock tests
 test-app :spock
+
+
+Test views:

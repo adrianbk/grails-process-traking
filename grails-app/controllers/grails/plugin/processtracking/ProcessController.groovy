@@ -13,7 +13,6 @@ class ProcessController {
     }
 
     def tile(){
-        log.error("called")
         render(view: '/processtracking/tile')
     }
 
