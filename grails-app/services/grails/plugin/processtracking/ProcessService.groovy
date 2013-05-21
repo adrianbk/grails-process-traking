@@ -44,11 +44,7 @@ class ProcessService {
         } else if(null != createProcessRequest.groupName){
             process.processGroup = new ProcessGroup(name: createProcessRequest.groupName, total: 1l)
             saveDomain(process.processGroup)
-        }else{
-//            process.processGroup = new ProcessGroup(name: createProcessRequest.processName)
-//            saveDomain(process.processGroup)
         }
-
 
         process.relatedDomainId = createProcessRequest.relatedDomainId;
         process.progress = 0F;
