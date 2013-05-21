@@ -1,6 +1,5 @@
 package grails.plugin.processtracking
 
-import org.jadira.usertype.dateandtime.joda.PersistentDateTime
 import org.joda.time.DateTime
 import org.joda.time.contrib.hibernate.PersistentDateTime
 

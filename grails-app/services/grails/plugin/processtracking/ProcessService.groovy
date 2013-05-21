@@ -36,18 +36,20 @@ class ProcessService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
         def Long createProcess(CreateProcessRequest createProcessRequest) {
         Process process = new Process()
+        process.initiated = DateTime.now()
 
-        if(null != createProcessRequest.processGroup || null != createProcessRequest.groupName){
-            ProcessGroup processGroup = createProcessRequest.processGroup
-            if(null != createProcessRequest.groupName){
-                processGroup = new ProcessGroup(name: createProcessRequest.groupName)
-            }
-            processGroup.total += 1
-            process.processGroup = processGroup
-            saveDomain(processGroup)
+        if(null != createProcessRequest.processGroupId){
+            process.processGroup = ProcessGroup.findById(createProcessRequest.processGroupId)
+            process.processGroup.total += 1
+        } else if(null != createProcessRequest.groupName){
+            process.processGroup = new ProcessGroup(name: createProcessRequest.groupName, total: 1l)
+            saveDomain(process.processGroup)
+        }else{
+//            process.processGroup = new ProcessGroup(name: createProcessRequest.processName)
+//            saveDomain(process.processGroup)
         }
 
-        process.initiated = DateTime.now()
+
         process.relatedDomainId = createProcessRequest.relatedDomainId;
         process.progress = 0F;
         process.name = createProcessRequest.processName
@@ -152,32 +154,33 @@ class ProcessService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     def void completeProcess(Long argProcessId) {
         Process process = Process.findById(argProcessId)
-        process.progress = 100F
         process.complete = DateTime.now()
+        process.progress = 100F
 
         TimeDuration td = getTimeDuration(process)
         process.addToProcessEvents(new ProcessEvent(message: "Process complete. Duration: ${td}", eventLevel: INFO, timestamp: DateTime.now()))
 
 
         int numErrorEvents = ProcessEvent.countByProcessAndEventLevel(process, ERROR)
-        process.status = numErrorEvents ? FAILED : SUCCESS
-
+        process.status = numErrorEvents > 0 ? FAILED : SUCCESS
         if(process.status == SUCCESS){
-            calculateAverageDuration(process, td)
+            Long calculatedAverage = calculateAverageDuration(process, td)
+            process.processGroup?.averageDuration =  calculatedAverage
         }
         saveDomain(process)
     }
 
-    private void calculateAverageDuration(Process process, TimeDuration td) {
+    private Long calculateAverageDuration(Process process, TimeDuration td) {
         ProcessGroup processGroup = process.processGroup
         if (null != processGroup) {
-            if (processGroup.averageDuration == 0L) {
-                process.processGroup.averageDuration = td.millis
+            if (processGroup.averageDuration == 0) {
+                return td.millis
             } else {
                 Long sum = processGroup.averageDuration + td.millis
-                process.processGroup.averageDuration = sum / 2
+                return sum / 2
             }
         }
+        return 0L
     }
 
     /**
@@ -204,7 +207,6 @@ class ProcessService {
         process.setComplete(DateTime.now())
         process.setStatus(FAILED)
         DateTime now = DateTime.now()
-        println "Failing Now: ${now}"
         TimeDuration td = getTimeDuration(process)
         process.addToProcessEvents(new ProcessEvent(message: "Process Failed. Duration: ${td}. ${argMessage}", eventLevel: ERROR, timestamp: now))
 

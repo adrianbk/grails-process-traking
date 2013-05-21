@@ -7,7 +7,7 @@ class CreateProcessRequest {
     Long relatedDomainId = null
     String groupName = null
     String queuedMessage = "Process queued"
-    ProcessGroup processGroup = null
+    Long processGroupId = null
 
     /**
      * The process name/label
@@ -52,13 +52,13 @@ class CreateProcessRequest {
     }
 
     /**
-     * Associated the process with and existing ProcessGroup. Calling this method and hence specifying a ProcessGroup
+     * Associated the process with and existing ProcessGroup. Calling this method and hence specifying a ProcessGroup id
      * will always associate the process with the group - the groupName will be ignored.
      * @param processGroup
      * @return
      */
-    def withProcessGroup(processGroup){
-        this.processGroup = processGroup
+    def withProcessGroupId(processGroupId){
+        this.processGroupId = processGroupId
         this
     }
 

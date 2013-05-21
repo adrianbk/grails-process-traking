@@ -66,7 +66,7 @@ class ProcessServiceTest extends GroovyTestCase {
                 .withProcessName('firstProcessGroupShouldHaveAverageOfDurationOfFirstProcess')
                 .withGroupName("Test Group")
         pid = processService.createProcess(cpr)
-        Thread.currentThread().sleep(SLEEP_DURATION)
+        sleep()
         processService.completeProcess(pid)
         Process process = processService.fetchProcess(pid)
 
@@ -148,17 +148,17 @@ class ProcessServiceTest extends GroovyTestCase {
     void shouldIncrementGroupAverageWhenCompleted(){
 
         Process p1 = processService.fetchProcess(processService.createProcess(new CreateProcessRequest().withGroupName("Test 1")))
-        ProcessGroup processGroup = p1.processGroup
 
-        Thread.currentThread().sleep(SLEEP_DURATION)
+        sleep()
         processService.completeProcess(p1.id)
 
         CreateProcessRequest createProcessRequest = new CreateProcessRequest()
-            .withProcessGroup(processGroup)
+            .withProcessGroupId(p1.processGroup.id)
 
         Process p2 = processService.fetchProcess(processService.createProcess(createProcessRequest))
-        Thread.currentThread().sleep(SLEEP_DURATION)
+        sleep()
         processService.completeProcess(p2.id)
+
         p2 = processService.fetchProcess(p2.id)
 
         assert p2.processGroup.total == 2
@@ -193,13 +193,11 @@ class ProcessServiceTest extends GroovyTestCase {
         assert process.complete.compareTo(now.withMillisOfSecond(0)) >= 0
     }
 
-    private isAverageDurationWithinThreshold (ProcessGroup processGroup, Long threshold, Long duration ){
-//        println "Avg Duration: ${processGroup.averageDuration} | Threshold: ${threshold} | Duration: ${duration} "
-        (processGroup.averageDuration - duration).abs() < threshold
+    private isAverageDurationSomewhatCorrect(ProcessGroup processGroup, Long sleep, int numberOfSleeps ){
+        processGroup.averageDuration >= ((sleep.multiply(numberOfSleeps)) / processGroup.total)
     }
 
-    private isAverageDurationSomewhatCorrect(ProcessGroup processGroup, Long sleep, int numberOfSleeps ){
-//        println "Avg Duration: ${processGroup.averageDuration} | sleep: ${sleep} | numberOfSleeps: ${numberOfSleeps} "
-        processGroup.averageDuration >= (sleep.multiply(numberOfSleeps))
+    public void sleep() {
+        Thread.sleep(SLEEP_DURATION)
     }
 }
