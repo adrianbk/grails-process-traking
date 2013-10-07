@@ -1,6 +1,7 @@
 import org.codehaus.groovy.grails.commons.DefaultGrailsDomainClass
 import grails.plugin.processtracking.Process
 import spock.lang.Shared
+import processtracking.ProcessTagLib
 
 // configuration for plugin testing - will not be included in the plugin zip
 //grails.json.legacy.builder = false
@@ -21,6 +22,11 @@ processTracking{
             complete: 'Complete',
             processGroup: 'ProcessGroup'
         ]
+
+    tableCellGenerators = {
+        status: [namespace: ProcessTagLib.namespace, method: processStatus]
+    }
+
 }
 
 log4j = {
@@ -31,7 +37,7 @@ log4j = {
         console name:'stdout', layout:pattern(conversionPattern:'%d [%t] %-5p %c{2} %x - %m%n')
 
     }
-
+    root { info 'stdout' }
     warn   'org.codehaus.groovy.grails.web.servlet',  //  controllers
            'org.codehaus.groovy.grails.web.pages', //  GSP
            'org.codehaus.groovy.grails.web.sitemesh', //  layouts

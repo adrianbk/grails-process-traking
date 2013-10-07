@@ -26,9 +26,9 @@ class ProcessServiceTest extends GroovyTestCase {
 
     @Before
     void clean(){
-//        Process.executeUpdate("delete from ProcessEvent")
-//        Process.executeUpdate("delete from Process")
-//        Process.executeUpdate("delete from ProcessGroup")
+        Process.executeUpdate("delete from ProcessEvent")
+        Process.executeUpdate("delete from Process")
+        Process.executeUpdate("delete from ProcessGroup")
         pid = processService.createProcess(new CreateProcessRequest())
     }
 

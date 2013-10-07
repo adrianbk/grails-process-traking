@@ -1,16 +1,14 @@
 package grails.plugin.processtracking
 
-import grails.test.mixin.TestFor
-import org.junit.Test
-import grails.test.mixin.Mock
-import grails.plugin.processtracking.ProcessEvent;
-import static grails.plugin.processtracking.Process.ProcessStatus.*
-import static grails.plugin.processtracking.ProcessEvent.EventLevel.*
 import grails.converters.deep.JSON
-import org.junit.Ignore
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
 import org.joda.time.DateTime
-import com.sun.xml.internal.bind.v2.TODO
+import org.junit.Ignore
+import org.junit.Test
 
+import static grails.plugin.processtracking.Process.ProcessStatus.QUEUED
+import static grails.plugin.processtracking.ProcessEvent.EventLevel.WARN
 
 @TestFor(ProcessController)
 @Mock([Process, ProcessEvent])

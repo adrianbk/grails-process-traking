@@ -1,5 +1,7 @@
 package grails.plugin.processtracking
 
+import org.joda.time.DateTime
+
 class ProcessController {
     def processService
 
@@ -56,8 +58,8 @@ class ProcessController {
         render(json.toPrettyString())
     }
 
-    private String toJsDate(Date date){
-        date?.getTime()
+    private String toJsDate(DateTime date){
+        date?.getMillis()
     }
 
 }

@@ -9,25 +9,22 @@ class ProcessTagLib {
     static final String TEMPLATE_DIR = '/processtracking/templates/'
     static final processDomainAttributes = new DefaultGrailsDomainClass(Process.class).persistantProperties*.name
 
-    def markup() {
-        new MarkupBuilder(out)
-        //mkp.yield "some content"
-    }
-
     /**
-     * Renders a table with all the sensible process attributes
+     * Renders a table with from a list of processes
      * @attr processList REQUIRED the list of processes to display on the table
      * @attr displayProperties OPTIONAL if specified only these properties are rendered
      */
     def processTable = {attr, body ->
         List<Process> processList = attr.processList
         def tableDisplayProperties = attr.tableDisplayProperties?: grailsApplication.config.processTracking.tableDisplayProperties
+        def tableCellGenerators = grailsApplication.config.processTracking.tableCellGenerators
         tableDisplayProperties = cleanse(tableDisplayProperties)
 
         out << g.render(template: "/processtracking/templates/processTable",
                 model: [
                     displayProperties: tableDisplayProperties,
-                    processList: processList
+                    processList: processList,
+                    tableCellGenerators: tableCellGenerators
                     ]
                 )
     }
@@ -36,6 +33,13 @@ class ProcessTagLib {
         Process process = attr.process
     }
 
+    /**
+     * @attr process REQUIRED the value to output
+     */
+    def processStatus = {attr, body ->
+        Process p = attr.process
+        out << '<td class="'+p.status.toString().toLowerCase()+'"></td>'
+    }
     private Map cleanse(map){
         map.findAll { key, value -> processDomainAttributes.contains(key)}
     }

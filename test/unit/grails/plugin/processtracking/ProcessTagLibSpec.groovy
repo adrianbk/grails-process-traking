@@ -8,6 +8,7 @@ import processtracking.ProcessTagLib
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
+import org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib
 
 @TestFor(ProcessTagLib)
 class ProcessTagLibSpec extends Specification {
@@ -97,7 +98,7 @@ class ProcessTagLibSpec extends Specification {
             )
         }
         when: "I render a process table"
-            def html = tagLib.processTable(processList: processInstanceList)
+            String html = tagLib.processTable(processList: processInstanceList)
             def dom = jsoup(html)
             Element table = dom.getElementsByTag('table').first()
             def rows = table.select('tr')
@@ -113,13 +114,20 @@ class ProcessTagLibSpec extends Specification {
                    if(null != process."${entry.key}"){
                        expected = process."${entry.key}"
                    }
-                   println "Expected: ${expected} for ${entry.key}"
                    assert cell.text() == expected
                }
            }
 
     }
 
+    def tableCellGenerators() {
+        expect:
+            tagLib.processStatus(process:defaultProcess()) ==  '<td class="failed"></td>'
+    }
+
+    Process defaultProcess(){
+        new Process(name: 'my process', status: Process.ProcessStatus.FAILED, id: 1L)
+    }
     Document jsoup(html) {
         Jsoup.parse(html.toString())
     }
