@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/adrianbk/grails-process-traking.png)](https://travis-ci.org/adrianbk/grails-process-traking.png)
+
 grails-process-traking
 ======================
 
