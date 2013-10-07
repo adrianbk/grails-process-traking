@@ -1,3 +1,4 @@
+<%@ page import="processtracking.ProcessTagLib" %>
 <table class="process-table">
     <tr>
         <g:each in="${displayProperties}" var="entry">
@@ -7,8 +8,7 @@
     <g:each in="${processList}" var="process" status="i">
         <tr data-process-id="${process.id}" class="${i % 2 == 0 ? 'even' : 'odd'}">
             <g:each in="${displayProperties}" var="entry">
-
-                    <td class="">${process."${entry.key}"}</td>
+                <td class="">${process."${entry.key}"}</td>
             </g:each>
         </tr>
     </g:each>

@@ -120,11 +120,6 @@ class ProcessTagLibSpec extends Specification {
 
     }
 
-    def tableCellGenerators() {
-        expect:
-            tagLib.processStatus(process:defaultProcess()) ==  '<td class="failed"></td>'
-    }
-
     Process defaultProcess(){
         new Process(name: 'my process', status: Process.ProcessStatus.FAILED, id: 1L)
     }

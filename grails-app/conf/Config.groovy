@@ -11,8 +11,7 @@ import processtracking.ProcessTagLib
 //grails.converters.json.date = "javascript"
 //grails.converters.json.domain.include.version = false
 
-
-processTracking{
+processTracking {
     tableDisplayProperties = [
             name: 'Name',
             initiated: 'Iinitiated',
@@ -21,12 +20,7 @@ processTracking{
             progress: 'Progress',
             complete: 'Complete',
             processGroup: 'ProcessGroup'
-        ]
-
-    tableCellGenerators = {
-        status: [namespace: ProcessTagLib.namespace, method: processStatus]
-    }
-
+    ]
 }
 
 log4j = {
@@ -34,22 +28,22 @@ log4j = {
     // appender:
     //
     appenders {
-        console name:'stdout', layout:pattern(conversionPattern:'%d [%t] %-5p %c{2} %x - %m%n')
+        console name: 'stdout', layout: pattern(conversionPattern: '%d [%t] %-5p %c{2} %x - %m%n')
 
     }
     root { info 'stdout' }
-    warn   'org.codehaus.groovy.grails.web.servlet',  //  controllers
-           'org.codehaus.groovy.grails.web.pages', //  GSP
-           'org.codehaus.groovy.grails.web.sitemesh', //  layouts
-           'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
-           'org.codehaus.groovy.grails.web.mapping', // URL mapping
-           'org.codehaus.groovy.grails.commons', // core / classloading
-           'org.codehaus.groovy.grails.plugins', // plugins
-           'org.springframework',
-           'org.hibernate',
-           'net.sf.ehcache.hibernate'
+    warn 'org.codehaus.groovy.grails.web.servlet',  //  controllers
+            'org.codehaus.groovy.grails.web.pages', //  GSP
+            'org.codehaus.groovy.grails.web.sitemesh', //  layouts
+            'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
+            'org.codehaus.groovy.grails.web.mapping', // URL mapping
+            'org.codehaus.groovy.grails.commons', // core / classloading
+            'org.codehaus.groovy.grails.plugins', // plugins
+            'org.springframework',
+            'org.hibernate',
+            'net.sf.ehcache.hibernate'
 
-    warn   'org.mortbay.log'
+    warn 'org.mortbay.log'
 //    debug    'org.hibernate.SQL'
     //Logs the actual params passed in the sql statements
 //    trace 'org.hibernate.type'

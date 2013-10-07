@@ -1,4 +1,9 @@
+# IDEA
+*.iml
+*.ipr
+*.iws
+/.idea
+#Build Dirs
 /out
 /target
-/.idea
-*.iml
+cobertura.ser

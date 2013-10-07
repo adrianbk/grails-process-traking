@@ -33,13 +33,6 @@ class ProcessTagLib {
         Process process = attr.process
     }
 
-    /**
-     * @attr process REQUIRED the value to output
-     */
-    def processStatus = {attr, body ->
-        Process p = attr.process
-        out << '<td class="'+p.status.toString().toLowerCase()+'"></td>'
-    }
     private Map cleanse(map){
         map.findAll { key, value -> processDomainAttributes.contains(key)}
     }
