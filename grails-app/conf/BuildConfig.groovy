@@ -32,6 +32,9 @@ grails.project.dependency.resolution = {
     dependencies {
         runtime 'mysql:mysql-connector-java:5.1.20'
         test ("org.jsoup:jsoup:1.7.2")
+        test "org.gebish:geb-spock:0.9.1"
+        test "org.seleniumhq.selenium:selenium-support:2.35.0"
+        test "org.seleniumhq.selenium:selenium-chrome-driver:2.35.0"
         compile("joda-time:joda-time-hibernate:1.3") {
             excludes "joda-time", "hibernate"
         }
@@ -58,6 +61,7 @@ grails.project.dependency.resolution = {
         compile (":lesscss-resources:1.3.3")
         compile (":joda-time:1.4")
         test ":spock:0.7"
+        test ":geb:0.9.1"
         test ":code-coverage:1.2.6"
 
         runtime (":hibernate:$grailsVersion") {
