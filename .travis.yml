@@ -10,5 +10,4 @@ before_install:
 - sudo apt-get update
 - sudo apt-get install grails-2.1.1
 
-
-script: grails test-app unit: integration:
+script: "grails test-app unit: integration:"
