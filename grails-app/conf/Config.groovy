@@ -1,7 +1,6 @@
 import org.codehaus.groovy.grails.commons.DefaultGrailsDomainClass
 import grails.plugin.processtracking.Process
 import spock.lang.Shared
-import processtracking.ProcessTagLib
 
 // configuration for plugin testing - will not be included in the plugin zip
 //grails.json.legacy.builder = false

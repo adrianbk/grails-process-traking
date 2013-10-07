@@ -1,4 +1,4 @@
-package processtracking
+package grails.plugin.processtracking
 
 import grails.plugin.processtracking.Process
 import groovy.xml.MarkupBuilder

@@ -4,7 +4,7 @@ import grails.test.mixin.TestFor
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
-import processtracking.ProcessTagLib
+import grails.plugin.processtracking.ProcessTagLib
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll

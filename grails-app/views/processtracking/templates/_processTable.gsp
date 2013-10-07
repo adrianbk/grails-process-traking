@@ -1,4 +1,4 @@
-<%@ page import="processtracking.ProcessTagLib" %>
+<%@ page import="grails.plugin.processtracking.ProcessTagLib" %>
 <table class="process-table">
     <tr>
         <g:each in="${displayProperties}" var="entry">
