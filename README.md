@@ -3,19 +3,16 @@
 grails-process-traking
 ======================
 
-A grails plugin for tracking and storing the status of an appllications processes.
-=======
+A grails plugin for tracking and storing the status of an applications processes.
 
 Running unit tests:
-test-app :unit //Non spock unit tests
-test-app :unit :spock //Both spock and standard unit tests
+`test-app :unit` //Non spock unit tests
+
+`test-app :unit :spock` //Both spock and standard unit tests
 
 
 Running Integration Tests:
-test-app :integration --echoOut
+`test-app :integration --echoOut`
 
 Running all spock tests
-test-app :spock
-
-
-Test views:
+`test-app :spock`
